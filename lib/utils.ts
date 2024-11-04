@@ -13,15 +13,12 @@ export function cn(...inputs: ClassValue[]) {
 // ERROR HANDLER
 export const handleError = (error: unknown) => {
   if (error instanceof Error) {
-    // This is a native JavaScript error (e.g., TypeError, RangeError)
     console.error(error.message);
     throw new Error(`Error: ${error.message}`);
   } else if (typeof error === "string") {
-    // This is a string error message
     console.error(error);
     throw new Error(`Error: ${error}`);
   } else {
-    // This is an unknown type of error
     console.error(error);
     throw new Error(`Unknown error: ${JSON.stringify(error)}`);
   }
@@ -39,7 +36,7 @@ const shimmer = (w: number, h: number) => `
   </defs>
   <rect width="${w}" height="${h}" fill="#7986AC" />
   <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
-  <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
+  <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite" />
 </svg>`;
 
 const toBase64 = (str: string) =>
@@ -50,7 +47,6 @@ const toBase64 = (str: string) =>
 export const dataUrl = `data:image/svg+xml;base64,${toBase64(
   shimmer(1000, 1000)
 )}`;
-// ==== End
 
 // FORM URL QUERY
 export const formUrlQuery = ({
@@ -85,19 +81,20 @@ export function removeKeysFromQuery({
 }
 
 // DEBOUNCE
-export const debounce = (func: (...args: any[]) => void, delay: number) => {
-  let timeoutId: NodeJS.Timeout | null;
-  return (...args: any[]) => {
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(null, args), delay);
+export const debounce = <T extends unknown[]>(func: (...args: T) => void, delay: number) => {
+  let timeoutId: NodeJS.Timeout | null = null; // Initialize timeoutId to null
+  return (...args: T) => {
+    if (timeoutId) clearTimeout(timeoutId); // Clear the previous timeout
+    timeoutId = setTimeout(() => func(...args), delay); // Use spread operator instead of apply
   };
 };
 
-// GE IMAGE SIZE
+
+// GET IMAGE SIZE
 export type AspectRatioKey = keyof typeof aspectRatioOptions;
 export const getImageSize = (
   type: string,
-  image: any,
+  image: { aspectRatio?: string; width?: number; height?: number },
   dimension: "width" | "height"
 ): number => {
   if (type === "fill") {
@@ -122,23 +119,25 @@ export const download = (url: string, filename: string) => {
       const a = document.createElement("a");
       a.href = blobURL;
 
-      if (filename && filename.length)
+      if (filename && filename.length) {
         a.download = `${filename.replace(" ", "_")}.png`;
+      }
       document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a); // Clean up
     })
     .catch((error) => console.log({ error }));
 };
 
 // DEEP MERGE OBJECTS
-export const deepMergeObjects = (obj1: any, obj2: any) => {
-  if(obj2 === null || obj2 === undefined) {
+export const deepMergeObjects = <T extends object>(obj1: T, obj2: Partial<T>): T => {
+  if (obj2 === null || obj2 === undefined) {
     return obj1;
   }
 
-  let output = { ...obj2 };
+  const output: T = { ...obj1, ...obj2 }; // Start with a shallow merge of obj1 and obj2
 
-  for (let key in obj1) {
+  for (const key in obj1) {
     if (obj1.hasOwnProperty(key)) {
       if (
         obj1[key] &&
@@ -147,8 +146,8 @@ export const deepMergeObjects = (obj1: any, obj2: any) => {
         typeof obj2[key] === "object"
       ) {
         output[key] = deepMergeObjects(obj1[key], obj2[key]);
-      } else {
-        output[key] = obj1[key];
+      } else if (!(key in obj2)) {
+        output[key] = obj1[key]; // Retain the value from obj1 if it does not exist in obj2
       }
     }
   }
