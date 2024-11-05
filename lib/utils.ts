@@ -85,19 +85,29 @@ export function removeKeysFromQuery({
 }
 
 // DEBOUNCE
-export const debounce = (func: (...args: any[]) => void, delay: number) => {
-  let timeoutId: NodeJS.Timeout | null;
-  return (...args: any[]) => {
+export const debounce = <T extends (...args: unknown[]) => void>(func: T, delay: number) => {
+  let timeoutId: NodeJS.Timeout | null = null;
+
+  return (...args: Parameters<T>) => {
     if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(null, args), delay);
+    timeoutId = setTimeout(() => func(...args), delay);
   };
 };
 
+
+
 // GE IMAGE SIZE
 export type AspectRatioKey = keyof typeof aspectRatioOptions;
+
+interface Image {
+  aspectRatio?: AspectRatioKey; // The aspectRatio can be of type AspectRatioKey
+  width?: number;                // Optional width property
+  height?: number;               // Optional height property
+}
+
 export const getImageSize = (
   type: string,
-  image: any,
+  image: Image,
   dimension: "width" | "height"
 ): number => {
   if (type === "fill") {
@@ -108,6 +118,7 @@ export const getImageSize = (
   }
   return image?.[dimension] || 1000;
 };
+
 
 // DOWNLOAD IMAGE
 export const download = (url: string, filename: string) => {
@@ -131,24 +142,30 @@ export const download = (url: string, filename: string) => {
 };
 
 // DEEP MERGE OBJECTS
-export const deepMergeObjects = (obj1: any, obj2: any) => {
-  if(obj2 === null || obj2 === undefined) {
+export const deepMergeObjects = <T>(obj1: T, obj2: Partial<T>): T => {
+  if (obj2 === null || obj2 === undefined) {
     return obj1;
   }
 
-  let output = { ...obj2 };
+  // Create a new object as output
+  let output: T = { ...obj1 }; // Start with the properties of obj1
 
-  for (let key in obj1) {
-    if (obj1.hasOwnProperty(key)) {
+  for (let key in obj2) {
+    if (obj2.hasOwnProperty(key)) {
+      const k = key as keyof T; // Type assertion to ensure key is of type keyof T
+
+      // Check if both properties are objects and not null
       if (
-        obj1[key] &&
-        typeof obj1[key] === "object" &&
-        obj2[key] &&
-        typeof obj2[key] === "object"
+        obj1[k] !== null &&
+        typeof obj1[k] === "object" &&
+        obj2[k] !== null &&
+        typeof obj2[k] === "object"
       ) {
-        output[key] = deepMergeObjects(obj1[key], obj2[key]);
+        // Recursively merge objects
+        output[k] = deepMergeObjects(obj1[k] as T[keyof T], obj2[k] as Partial<T[keyof T]>);
       } else {
-        output[key] = obj1[key];
+        // Otherwise, take the value from obj2
+        output[k] = obj2[k] as T[keyof T]; // Type assertion to ensure type safety
       }
     }
   }

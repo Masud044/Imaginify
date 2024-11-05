@@ -18,7 +18,22 @@ declare type UpdateUserParams = {
   photo: string;
 };
 
-// ====== IMAGE PARAMS
+/// Type representing image configuration properties
+declare type ImageConfig = {
+  quality?: number;
+  format?: 'jpg' | 'png' | 'webp' | 'gif';
+  crop?: 'fit' | 'fill' | 'scale' | 'thumb' | 'crop';
+  gravity?: 'center' | 'north' | 'south' | 'east' | 'west';
+  transformationOptions?: {
+    brightness?: number;
+    contrast?: number;
+    saturation?: number;
+  };
+  [key: string]: string | number | boolean | ImageConfig['transformationOptions'];
+};
+
+
+// Type for adding a new image
 declare type AddImageParams = {
   image: {
     title: string;
@@ -26,17 +41,18 @@ declare type AddImageParams = {
     transformationType: string;
     width: number;
     height: number;
-    config: any;
+    config: ImageConfig;
     secureURL: string;
     transformationURL: string;
-    aspectRatio: string | undefined;
-    prompt: string | undefined;
-    color: string | undefined;
+    aspectRatio?: string;
+    prompt?: string;
+    color?: string;
   };
   userId: string;
   path: string;
 };
 
+// Type for updating an existing image
 declare type UpdateImageParams = {
   image: {
     _id: string;
@@ -45,17 +61,18 @@ declare type UpdateImageParams = {
     transformationType: string;
     width: number;
     height: number;
-    config: any;
+    config: ImageConfig;
     secureURL: string;
     transformationURL: string;
-    aspectRatio: string | undefined;
-    prompt: string | undefined;
-    color: string | undefined;
+    aspectRatio?: string;
+    prompt?: string;
+    color?: string;
   };
   userId: string;
   path: string;
 };
 
+// Types for transformations that can be applied to images
 declare type Transformations = {
   restore?: boolean;
   fillBackground?: boolean;
@@ -128,8 +145,24 @@ declare type TransformationFormProps = {
   config?: Transformations | null;
 };
 
+// Define the type for transformed image data
+declare type TransformedImageData = {
+  id: string;
+  title: string;
+  publicId: string;
+  transformationType: string;
+  width: number;
+  height: number;
+  secureURL: string;
+  transformationURL: string;
+  aspectRatio?: string;
+  prompt?: string;
+  color?: string;
+};
+
+// Updated TransformedImageProps without "any" type
 declare type TransformedImageProps = {
-  image: any;
+  image: TransformedImageData;
   type: string;
   title: string;
   transformationConfig: Transformations | null;
@@ -137,3 +170,4 @@ declare type TransformedImageProps = {
   hasDownload?: boolean;
   setIsTransforming?: React.Dispatch<React.SetStateAction<boolean>>;
 };
+
