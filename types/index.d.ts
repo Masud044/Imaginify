@@ -1,5 +1,5 @@
-/* eslint-disable no-unused-vars */
 
+/* eslint-disable no-unused-vars */
 
 // ====== USER PARAMS
 declare type CreateUserParams = {
@@ -19,33 +19,39 @@ declare type UpdateUserParams = {
 };
 
 // ====== IMAGE PARAMS
-declare type ImageConfig = {
-  // Define the structure of your image configuration object
-  [key: string]: unknown; // Use more specific keys and types as needed
-};
-
-declare type ImageDetails = {
-  title: string;
-  publicId: string;
-  transformationType: string;
-  width: number;
-  height: number;
-  config: ImageConfig; // Replace 'any' with a specific type
-  secureURL: string;
-  transformationURL: string;
-  aspectRatio: string | undefined;
-  prompt: string | undefined;
-  color: string | undefined;
-};
-
 declare type AddImageParams = {
-  image: ImageDetails; // Use the new ImageDetails type
+  image: {
+    title: string;
+    publicId: string;
+    transformationType: string;
+    width: number;
+    height: number;
+    config: any;
+    secureURL: string;
+    transformationURL: string;
+    aspectRatio: string | undefined;
+    prompt: string | undefined;
+    color: string | undefined;
+  };
   userId: string;
   path: string;
 };
 
 declare type UpdateImageParams = {
-  image: ImageDetails & { _id: string }; // Extend ImageDetails with _id
+  image: {
+    _id: string;
+    title: string;
+    publicId: string;
+    transformationType: string;
+    width: number;
+    height: number;
+    config: any;
+    secureURL: string;
+    transformationURL: string;
+    aspectRatio: string | undefined;
+    prompt: string | undefined;
+    color: string | undefined;
+  };
   userId: string;
   path: string;
 };
@@ -118,12 +124,12 @@ declare type TransformationFormProps = {
   userId: string;
   type: TransformationTypeKey;
   creditBalance: number;
-  data?: IImage | null; // Ensure IImage is defined appropriately
+  data?: IImage | null;
   config?: Transformations | null;
 };
 
 declare type TransformedImageProps = {
-  image: ImageDetails; // Replace 'any' with ImageDetails type
+  image: any;
   type: string;
   title: string;
   transformationConfig: Transformations | null;
